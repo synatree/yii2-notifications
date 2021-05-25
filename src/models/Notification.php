@@ -31,6 +31,10 @@ use yii\helpers\Json;
 class Notification extends ActiveRecord
 {
 
+    public static function tableName()
+    {
+	return 'notification';
+    }
     /**
      * @inheritdoc
      */
@@ -50,7 +54,7 @@ class Notification extends ActiveRecord
         return [
             [
                 'class' => TimestampBehavior::className(),
-                'value' => new Expression('CURRENT_TIMESTAMP'),
+                'value' => new Expression('NOW()'),
             ],
             ReadableBehavior::className()
         ];

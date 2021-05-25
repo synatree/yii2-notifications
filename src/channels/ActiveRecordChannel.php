@@ -14,6 +14,8 @@ use yii\base\InvalidConfigException;
 use yii\db\BaseActiveRecord;
 use yii\helpers\Json;
 
+use tuyakhov\notifications\models\Notification;
+
 class ActiveRecordChannel extends Component implements ChannelInterface
 {
     /**
@@ -23,14 +25,8 @@ class ActiveRecordChannel extends Component implements ChannelInterface
 
     public function send(NotifiableInterface $recipient, NotificationInterface $notification)
     {
-        $model = \Yii::createObject($this->model);
-
-        if (!$model instanceof BaseActiveRecord) {
-            throw new InvalidConfigException('Model class must extend from \\yii\\db\\BaseActiveRecord');
-        }
-
-        /** @var DatabaseMessage $message */
         $message = $notification->exportFor('database');
+	\Yii::warning(print_r($message,true));
         list($notifiableType, $notifiableId) = $recipient->routeNotificationFor('database');
         $data = [
             'level' => $message->level,
@@ -41,10 +37,15 @@ class ActiveRecordChannel extends Component implements ChannelInterface
             'data' => Json::encode($message->data),
         ];
 
-        if ($model->load($data, '')) {
-            return $model->insert();
-        }
+	$model = new Notification($data);
+	$ret = $model->save();
 
-        return false;
+	if(!$ret)
+	{
+		\Yii::warning("A problem: " . print_r($model->getErrors(),true));
+	}
+	
+
+        return $ret;
     }
 }
